@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30225.117
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Adeotek.NetworkMonitor.CLI", "src\Adeotek.NetworkMonitor.CLI\Adeotek.NetworkMonitor.CLI.csproj", "{7E037F93-21CE-4F02-9DA3-8D7F87B1BD07}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Adeotek.NetworkMonitor", "src\Adeotek.NetworkMonitor\Adeotek.NetworkMonitor.csproj", "{A61DE06E-8E30-4F4D-B504-6367D39F19E3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2A033807-AA66-45AE-949D-DCFE5249CCB8}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		BUILD.md = BUILD.md
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7E037F93-21CE-4F02-9DA3-8D7F87B1BD07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E037F93-21CE-4F02-9DA3-8D7F87B1BD07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E037F93-21CE-4F02-9DA3-8D7F87B1BD07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E037F93-21CE-4F02-9DA3-8D7F87B1BD07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A61DE06E-8E30-4F4D-B504-6367D39F19E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A61DE06E-8E30-4F4D-B504-6367D39F19E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A61DE06E-8E30-4F4D-B504-6367D39F19E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A61DE06E-8E30-4F4D-B504-6367D39F19E3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D10B85FB-6EB6-40EE-8579-14FB3706FD00}
+	EndGlobalSection
+EndGlobal
