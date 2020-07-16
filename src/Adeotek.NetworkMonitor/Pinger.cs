@@ -29,6 +29,20 @@ namespace Adeotek.NetworkMonitor
         {
             return new PingResult(_ping.Send(host, Timeout, Data, PingOptions), host);
         }
+        
+        public PingResult SafePing(string host)
+        {
+            PingResult result;
+            try
+            {
+                result = new PingResult(_ping.Send(host, Timeout, Data, PingOptions), host);
+            }
+            catch (Exception e)
+            {
+                result = new PingResult {Success = false, Target = host, Message = e.Message};
+            }
+            return result;
+        }
 
         public async Task<PingResult> PingAsync(string host)
         {

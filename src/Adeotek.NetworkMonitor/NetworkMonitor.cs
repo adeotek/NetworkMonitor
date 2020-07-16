@@ -11,15 +11,13 @@ namespace Adeotek.NetworkMonitor
 {
     public class NetworkMonitor
     {
-        private readonly IConfiguration _configuration;
         private readonly AppConfiguration _appConfiguration;
         private readonly ILogger _logger;
 
         public NetworkMonitor(IConfiguration configuration, ILogger logger)
         {
-            _configuration = configuration;
             _logger = logger;
-            _appConfiguration = _configuration.GetSection("Application").Get<AppConfiguration>();
+            _appConfiguration = configuration.GetSection("Application").Get<AppConfiguration>();
             if (_appConfiguration == null)
             {
                 throw new Exception("Invalid or missing [Application] configuration section!");
@@ -45,7 +43,7 @@ namespace Adeotek.NetworkMonitor
             }
 
             timer.Stop();
-            _logger?.LogDebug($"All tests done in {timer.ElapsedMilliseconds/1000:#0.000} sec.!");
+            _logger?.LogDebug($"All tests done in {timer.ElapsedMilliseconds/1000:#0.000} sec.");
         }
 
         public void RunPingTest()
@@ -62,17 +60,27 @@ namespace Adeotek.NetworkMonitor
                 var timer = new Stopwatch();
                 timer.Start();
                 var pinger = new Pinger();
-                var results = _appConfiguration.Ping.Targets.Select(target => pinger.Ping(target)).ToList();
+                var results = _appConfiguration.Ping.Targets.Select(target => pinger.SafePing(target)).ToList();
+                var logToFile = true;
                 if (_appConfiguration?.Ping.SendToGoogleSpreadsheet ?? false)
                 {
-                    WritePingData(results);
+                    try
+                    {
+                        WritePingData(results);
+                        logToFile = false;
+                    }
+                    catch (Exception e)
+                    {
+                        logToFile = true;
+                        _logger?.LogError(e, "Unable to send data to Google Spreadsheets API");
+                    }
                 }
-                else
+                if(logToFile)
                 {
                     _logger?.LogInformation($"Ping test results: {JsonSerializer.Serialize(results)}");
                 }
                 timer.Stop();
-                _logger?.LogInformation($"Ping test done in {timer.ElapsedMilliseconds / 1000:#0.000} sec.!");
+                _logger?.LogInformation($"Ping test done in {timer.ElapsedMilliseconds / 1000:#0.000} sec.");
             }
             catch (Exception e)
             {
@@ -97,7 +105,7 @@ namespace Adeotek.NetworkMonitor
 
 
                 timer.Stop();
-                _logger?.LogDebug($"Speed test done in {timer.ElapsedMilliseconds / 1000:#0.000} sec.!");
+                _logger?.LogDebug($"Speed test done in {timer.ElapsedMilliseconds / 1000:#0.000} sec.");
             }
             catch (Exception e)
             {
@@ -131,29 +139,19 @@ namespace Adeotek.NetworkMonitor
             }
 
             var listItem = new List<object> { rNo + 1, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") };
-            var range = $"A{rNo + 2}:";
-            var lastColumn = 'B';
-            
-            foreach (var item in data)
-            {
-                if (item == null || !item.Success)
-                {
-                    continue;
-                }
-                listItem.Add(item.Time);
-                lastColumn = GetNextLetter(lastColumn);
-            }
+            var range = $"A{rNo + 2}:{GetNextLetter('B', data.Count * 2)}{rNo + 2}";
+            listItem.AddRange(data.Select(item => item?.Success ?? false ? item.Time.ToString() : string.Empty));
+            listItem.AddRange(data.Select(item => item?.Success ?? false ? string.Empty : item?.Message ?? "N/A"));
             var values = new List<IList<object>> { listItem };
-            range += lastColumn + (rNo + 2).ToString();
 
             return gSheets.WriteRange(values, range, _appConfiguration.Ping.GoogleSheetName);
         }
 
-        private static char GetNextLetter(char currentLetter) => currentLetter switch
+        private static char GetNextLetter(char currentLetter, int offset = 1) => currentLetter switch
         {
             'z' => 'a',
             'Z' => 'A',
-            _ => (char) (currentLetter + 1)
+            _ => (char) (currentLetter + offset)
         };
     }
 }

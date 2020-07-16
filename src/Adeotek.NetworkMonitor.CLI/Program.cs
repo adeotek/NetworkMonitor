@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,31 +12,56 @@ namespace Adeotek.NetworkMonitor.CLI
 {
     class Program
     {
+        private static string _environmentName;
         private static IConfiguration _configuration;
         private static ILogger _logger;
         
         static void Main(string[] args)
         {
+            SetEnvironmentName(args);
+            Console.WriteLine($"Starting network monitor CLI {(_environmentName == "Development" ? "(Development) " : string.Empty)}...");
             if (!LoadConfiguration(args))
             {
                 return;
             }
-
             SetupLogger();
 
             try
             {
                 var networkMonitor = new NetworkMonitor(_configuration, _logger);
                 networkMonitor.RunAllTests();
+                Console.WriteLine("Exiting network monitor...");
             }
             catch (Exception e)
             {
-                _logger?.LogError(e, "NetworkMonitor.RunAllTest failed!");
+                if (_logger != null)
+                {
+                    _logger.LogError(e, "NetworkMonitor.RunAllTest failed!");
+                }
+                else
+                {
+                    Console.WriteLine($"NetworkMonitor.RunAllTest failed with error: {e.Message}");
+                }
             }
 
-            if (_configuration.GetValue("environment",string.Empty) == "Development")
+            if (_environmentName == "Development")
             {
                 Console.ReadKey();
+            }
+        }
+
+        private static void SetEnvironmentName(string[] args)
+        {
+            _environmentName = Environment.GetEnvironmentVariable("DOTNETCORE_ENVIRONMENT");
+            foreach (var arg in args)
+            {
+                if (arg.ToUpper().StartsWith("DOTNETCORE_ENVIRONMENT=") && arg.Length>24)
+                {
+                    _environmentName = arg.Substring(23);
+                } else if (arg.ToUpper().StartsWith("ENVIRONMENT=") && arg.Length > 13)
+                {
+                    _environmentName = arg.Substring(12);
+                }
             }
         }
 
@@ -43,9 +69,11 @@ namespace Adeotek.NetworkMonitor.CLI
         {
             try
             {
+                Console.WriteLine($"Configuration location: {AppDomain.CurrentDomain.BaseDirectory}");
                 _configuration = new ConfigurationBuilder()
                     .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                    .AddJsonFile($"appsettings.{_environmentName}.json", true, true)
                     .AddEnvironmentVariables()
                     .AddCommandLine(args)
                     .Build();
