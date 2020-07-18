@@ -1,8 +1,5 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text.Json;
 using Adeotek.NetworkMonitor.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,26 +9,29 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Adeotek.NetworkMonitor.CLI
 {
-    class Program
+    internal class Program
     {
         private static string _environmentName;
         private static IConfiguration _configuration;
+        private static AppConfiguration _appConfiguration;
         private static ILogger _logger;
-        
-        static void Main(string[] args)
+
+        private static void Main(string[] args)
         {
             SetEnvironmentName(args);
-            Console.WriteLine($"Starting network monitor CLI {(_environmentName == "Development" ? "(Development) " : string.Empty)}...");
+            Console.WriteLine(
+                $"Starting network monitor CLI {(_environmentName == "Development" ? "(Development) " : string.Empty)}...");
             if (!LoadConfiguration(args))
             {
                 return;
             }
+
             SetupLogger();
 
             try
             {
-                var networkMonitor = new NetworkMonitor(_configuration, _logger, AppDomain.CurrentDomain.BaseDirectory);
-                networkMonitor.RunAllTests();
+                var networkMonitor = new NetworkMonitor(_appConfiguration, _logger);
+                networkMonitor.RunTests();
                 Console.WriteLine("Exiting network monitor...");
             }
             catch (Exception e)
@@ -57,10 +57,11 @@ namespace Adeotek.NetworkMonitor.CLI
             _environmentName = Environment.GetEnvironmentVariable("DOTNETCORE_ENVIRONMENT");
             foreach (var arg in args)
             {
-                if (arg.ToUpper().StartsWith("DOTNETCORE_ENVIRONMENT=") && arg.Length>24)
+                if (arg.ToUpper().StartsWith("DOTNETCORE_ENVIRONMENT=") && arg.Length > 24)
                 {
                     _environmentName = arg.Substring(23);
-                } else if (arg.ToUpper().StartsWith("ENVIRONMENT=") && arg.Length > 13)
+                }
+                else if (arg.ToUpper().StartsWith("ENVIRONMENT=") && arg.Length > 13)
                 {
                     _environmentName = arg.Substring(12);
                 }
@@ -75,13 +76,32 @@ namespace Adeotek.NetworkMonitor.CLI
                 {
                     Console.WriteLine($"Configuration location: {AppDomain.CurrentDomain.BaseDirectory}");
                 }
+
                 _configuration = new ConfigurationBuilder()
                     .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                    .AddJsonFile("appsettings.json", false, true)
                     .AddJsonFile($"appsettings.{_environmentName}.json", true, true)
                     .AddEnvironmentVariables()
                     .AddCommandLine(args)
                     .Build();
+
+                _appConfiguration = _configuration.GetSection("Application").Get<AppConfiguration>();
+                if (_appConfiguration == null)
+                {
+                    throw new Exception("Invalid or missing [Application] configuration section!");
+                }
+
+                _appConfiguration.AppPath = AppDomain.CurrentDomain.BaseDirectory;
+                if (args.Select(a => a.ToLower() == "--do-ping-test").FirstOrDefault() && _appConfiguration.PingTest != null)
+                {
+                    _appConfiguration.PingTest.Enabled = true;
+                }
+
+                if (args.Select(a => a.ToLower() == "--do-speed-test").FirstOrDefault() && _appConfiguration.SpeedTest != null)
+                {
+                    _appConfiguration.SpeedTest.Enabled = true;
+                }
+
                 return true;
             }
             catch (Exception e)
@@ -96,8 +116,7 @@ namespace Adeotek.NetworkMonitor.CLI
             try
             {
                 ServiceCollection services;
-                using var sLogger = new LoggerConfiguration().ReadFrom.Configuration(_configuration)
-                    .CreateLogger();
+                using var sLogger = new LoggerConfiguration().ReadFrom.Configuration(_configuration).CreateLogger();
                 services = new ServiceCollection();
                 services.AddLogging(configure => configure.AddSerilog(sLogger, true));
 

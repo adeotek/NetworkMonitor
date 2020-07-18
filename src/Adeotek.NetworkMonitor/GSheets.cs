@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Adeotek.NetworkMonitor.Configuration;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
@@ -13,13 +12,12 @@ namespace Adeotek.NetworkMonitor
     public class GSheets
     {
         private const string ApplicationName = "AdeoTEK Network Monitor";
+
         // If modifying these scopes, delete your previously saved credentials
         // at ~/.credentials/sheets.googleapis.com-dotnet-quickstart.json
-        private readonly string[] _scopes = { SheetsService.Scope.Spreadsheets };
+        private readonly string[] _scopes = {SheetsService.Scope.Spreadsheets};
         private readonly SheetsService _sheetsService;
 
-        public string SpreadsheetId { get; set; }
-        
         public GSheets(Dictionary<string, string> config, string appPath, string spreadsheetId = null)
         {
             if (config == null)
@@ -42,7 +40,7 @@ namespace Adeotek.NetworkMonitor
             {
                 throw new Exception($"Invalid or missing credentials file: {credentialsFile}");
             }
-            
+
             using var stream = new FileStream(credentialsFile, FileMode.Open, FileAccess.Read);
             var serviceInitializer = new BaseClientService.Initializer
             {
@@ -61,6 +59,8 @@ namespace Adeotek.NetworkMonitor
             _sheetsService = new SheetsService(serviceInitializer);
             SpreadsheetId = spreadsheetId;
         }
+
+        public string SpreadsheetId { get; set; }
 
         public bool CreateSheetIfMissing(string sheetName, string spreadsheetId = null)
         {
@@ -93,13 +93,16 @@ namespace Adeotek.NetworkMonitor
 
                 var addSheetRequest = new AddSheetRequest
                 {
-                    Properties = new SheetProperties { Title = sheetName, GridProperties = new GridProperties { RowCount = 60000, ColumnCount = 26 } }
+                    Properties = new SheetProperties
+                        {Title = sheetName, GridProperties = new GridProperties {RowCount = 60000, ColumnCount = 26}}
                 };
                 var batchUpdateSpreadsheetRequest = new BatchUpdateSpreadsheetRequest
                 {
-                    Requests = new List<Request> { new Request { AddSheet = addSheetRequest } }
+                    Requests = new List<Request> {new Request {AddSheet = addSheetRequest}}
                 };
-                var batchUpdateRequest = _sheetsService.Spreadsheets.BatchUpdate(batchUpdateSpreadsheetRequest, spreadsheetId ?? SpreadsheetId);
+                var batchUpdateRequest =
+                    _sheetsService.Spreadsheets.BatchUpdate(batchUpdateSpreadsheetRequest,
+                        spreadsheetId ?? SpreadsheetId);
                 var response = batchUpdateRequest.Execute();
                 return response != null;
             }
@@ -118,12 +121,14 @@ namespace Adeotek.NetworkMonitor
 
             try
             {
-                var request = _sheetsService.Spreadsheets.Values.Get(spreadsheetId ?? SpreadsheetId, GetRange(range, sheetName));
+                var request =
+                    _sheetsService.Spreadsheets.Values.Get(spreadsheetId ?? SpreadsheetId, GetRange(range, sheetName));
                 return request.Execute().Values;
             }
             catch (Exception e)
             {
-                throw new Exception($"Unable to read range [{GetRange(range, sheetName)}] from spreadsheet [{spreadsheetId ?? SpreadsheetId}]: {e.Message}");
+                throw new Exception(
+                    $"Unable to read range [{GetRange(range, sheetName)}] from spreadsheet [{spreadsheetId ?? SpreadsheetId}]: {e.Message}");
             }
         }
 
@@ -136,24 +141,31 @@ namespace Adeotek.NetworkMonitor
 
             try
             {
-                var update = _sheetsService.Spreadsheets.Values.Update(new ValueRange { Values = values }, spreadsheetId ?? SpreadsheetId, GetRange(range, sheetName));
+                var update = _sheetsService.Spreadsheets.Values.Update(new ValueRange {Values = values},
+                    spreadsheetId ?? SpreadsheetId, GetRange(range, sheetName));
                 update.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.RAW;
                 return update.Execute().UpdatedRows ?? 0;
             }
             catch (Exception e)
             {
-                throw new Exception($"Unable to write data to range [{GetRange(range, sheetName)}] in spreadsheet [{spreadsheetId ?? SpreadsheetId}]: {e.Message}");
+                throw new Exception(
+                    $"Unable to write data to range [{GetRange(range, sheetName)}] in spreadsheet [{spreadsheetId ?? SpreadsheetId}]: {e.Message}");
             }
-            
         }
 
-        private static string GetRange(string range, string sheetName) => $"'{sheetName}'!{range}";
-
-        public static char GetNextLetter(char currentLetter, int offset = 1) => currentLetter switch
+        private static string GetRange(string range, string sheetName)
         {
-            'z' => 'a',
-            'Z' => 'A',
-            _ => (char) (currentLetter + offset)
-        };
+            return $"'{sheetName}'!{range}";
+        }
+
+        public static char GetNextLetter(char currentLetter, int offset = 1)
+        {
+            return currentLetter switch
+            {
+                'z' => 'a',
+                'Z' => 'A',
+                _ => (char) (currentLetter + offset)
+            };
+        }
     }
 }
