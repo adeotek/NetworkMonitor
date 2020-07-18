@@ -71,7 +71,10 @@ namespace Adeotek.NetworkMonitor.CLI
         {
             try
             {
-                Console.WriteLine($"Configuration location: {AppDomain.CurrentDomain.BaseDirectory}");
+                if (_environmentName == "Development")
+                {
+                    Console.WriteLine($"Configuration location: {AppDomain.CurrentDomain.BaseDirectory}");
+                }
                 _configuration = new ConfigurationBuilder()
                     .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)

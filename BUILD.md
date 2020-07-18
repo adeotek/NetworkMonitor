@@ -2,5 +2,5 @@
 -
 
 <pre>
-dotnet build --runtime linux-arm --self-contained false
+dotnet publish --runtime linux-arm --no-self-contained --configuration Release
 </pre>

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text.Json;
 using Adeotek.NetworkMonitor.Configuration;
 using Microsoft.Extensions.Configuration;
@@ -202,20 +201,20 @@ namespace Adeotek.NetworkMonitor
             {
                 throw new Exception("Invalid table name!");
             }
-
+            
             var dbSchema = config.ContainsKey("Schema") ? config["Schema"] : null;
             if (string.IsNullOrEmpty(dbSchema))
             {
                 throw new Exception("Invalid database schema!");
             }
-
+            
             var connectionString = GetConnectionString(config);
             using var dbConnection = new NpgsqlConnection(connectionString);
             try
             {
                 dbConnection.Open();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 _logger?.LogError($"Invalid database connection string: [{connectionString}]");
                 throw;
@@ -228,7 +227,7 @@ namespace Adeotek.NetworkMonitor
                 {
                     continue;
                 }
-
+            
                 if (first)
                 {
                     first = false;
