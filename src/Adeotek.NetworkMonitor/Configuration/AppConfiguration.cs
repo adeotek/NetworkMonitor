@@ -1,17 +1,12 @@
-﻿using System.Text.Json;
+﻿using System.Collections.Generic;
 
 namespace Adeotek.NetworkMonitor.Configuration
 {
     public class AppConfiguration
     {
-        public PingConfiguration Ping { get; set; }
+        public PingConfiguration PingTest { get; set; }
         public SpeedTestConfiguration SpeedTest { get; set; }
-        public string GoogleSpreadsheetId { get; set; }
-        public GoogleCredentials GoogleCredentials { get; set; }
-
-        public string GetGoogleCredentialsJson()
-        {
-            return JsonSerializer.Serialize(GoogleCredentials);
-        }
+        public List<DataTarget> WriteDataTo { get; set; }
+        public string AppPath { get; set; }
     }
 }

@@ -355,3 +355,4 @@ MigrationBackup/
 # Custom
 /src/Adeotek.NetworkMonitor.CLI/appsettings.json
 /src/Adeotek.NetworkMonitor.CLI/appsettings.Development.json
+/src/Adeotek.NetworkMonitor.CLI/gcredentials.json

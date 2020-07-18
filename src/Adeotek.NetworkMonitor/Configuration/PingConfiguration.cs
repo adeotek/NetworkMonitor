@@ -6,7 +6,6 @@ namespace Adeotek.NetworkMonitor.Configuration
     {
         public bool Enabled { get; set; } = false;
         public List<string> Targets { get; set; }
-        public bool SendToGoogleSpreadsheet { get; set; } = false;
-        public string GoogleSheetName { get; set; }
+        public string WriteToCollection { get; set; }
     }
 }

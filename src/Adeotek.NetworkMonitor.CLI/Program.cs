@@ -2,6 +2,8 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
+using Adeotek.NetworkMonitor.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -28,7 +30,7 @@ namespace Adeotek.NetworkMonitor.CLI
 
             try
             {
-                var networkMonitor = new NetworkMonitor(_configuration, _logger);
+                var networkMonitor = new NetworkMonitor(_configuration, _logger, AppDomain.CurrentDomain.BaseDirectory);
                 networkMonitor.RunAllTests();
                 Console.WriteLine("Exiting network monitor...");
             }

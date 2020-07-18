@@ -19,35 +19,47 @@ namespace Adeotek.NetworkMonitor
         private readonly SheetsService _sheetsService;
 
         public string SpreadsheetId { get; set; }
-
-        public GSheets(string credentialsFile, string spreadsheetId = null)
+        
+        public GSheets(Dictionary<string, string> config, string appPath, string spreadsheetId = null)
         {
-            if (credentialsFile == null)
+            if (config == null)
             {
-                throw new ArgumentNullException("credentialsFile");
+                throw new ArgumentNullException("config");
             }
 
-            if (credentialsFile.Trim().Length == 0 || !File.Exists(credentialsFile))
+            var credentialsFile = config.ContainsKey("CredentialsFile") ? config["CredentialsFile"] : null;
+            if (credentialsFile == null || credentialsFile.Trim().Length == 0)
             {
-                throw new Exception("Invalid or missing credentials file!");
+                throw new Exception($"Invalid credentials file name/path: {credentialsFile}");
             }
+
+            if (!Path.IsPathRooted(credentialsFile))
+            {
+                credentialsFile = Path.Join(appPath, credentialsFile);
+            }
+
+            if (!File.Exists(credentialsFile))
+            {
+                throw new Exception($"Invalid or missing credentials file: {credentialsFile}");
+            }
+            
             using var stream = new FileStream(credentialsFile, FileMode.Open, FileAccess.Read);
             var serviceInitializer = new BaseClientService.Initializer
             {
                 HttpClientInitializer = GoogleCredential.FromStream(stream).CreateScoped(_scopes)
             };
             _sheetsService = new SheetsService(serviceInitializer);
-            SpreadsheetId = spreadsheetId;
+            SpreadsheetId = spreadsheetId ?? (config.ContainsKey("SpreadsheetId") ? config["SpreadsheetId"] : null);
         }
 
-        public GSheets(AppConfiguration config, string spreadsheetId = null)
+        public GSheets(string credentialsJson, string spreadsheetId)
         {
             var serviceInitializer = new BaseClientService.Initializer
             {
-                HttpClientInitializer = GoogleCredential.FromJson(config.GetGoogleCredentialsJson()).CreateScoped(_scopes)
+                HttpClientInitializer = GoogleCredential.FromJson(credentialsJson).CreateScoped(_scopes)
             };
             _sheetsService = new SheetsService(serviceInitializer);
-            SpreadsheetId = spreadsheetId ?? config.GoogleSpreadsheetId;
+            SpreadsheetId = spreadsheetId;
         }
 
         public bool CreateSheetIfMissing(string sheetName, string spreadsheetId = null)
@@ -136,5 +148,12 @@ namespace Adeotek.NetworkMonitor
         }
 
         private static string GetRange(string range, string sheetName) => $"'{sheetName}'!{range}";
+
+        public static char GetNextLetter(char currentLetter, int offset = 1) => currentLetter switch
+        {
+            'z' => 'a',
+            'Z' => 'A',
+            _ => (char) (currentLetter + offset)
+        };
     }
 }
