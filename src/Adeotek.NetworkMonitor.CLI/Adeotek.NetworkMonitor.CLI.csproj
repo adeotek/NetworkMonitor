@@ -5,8 +5,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Adeotek.NetworkMonitor.CLI</RootNamespace>
     <PackageId>Adeotek.NetworkMonitor.CLI</PackageId>
-    <AssemblyVersion>1.0.0.1</AssemblyVersion>
-    <FileVersion>1.0.0.1</FileVersion>
+    <AssemblyVersion>1.0.1.2</AssemblyVersion>
+    <FileVersion>1.0.1.2</FileVersion>
     <Version>1.0.0</Version>
     <Authors>AdeoTEK Software SRL</Authors>
     <Product>AdeoTEK Network Monitor CLI</Product>
@@ -37,6 +37,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="appsettings.Development.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="gcredentials.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
