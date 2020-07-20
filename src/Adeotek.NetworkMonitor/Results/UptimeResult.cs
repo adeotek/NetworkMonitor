@@ -30,14 +30,14 @@ namespace Adeotek.NetworkMonitor.Results
         public UptimeResult()
         {
             Success = false;
-            Timestamp = DateTime.Now;
+            Timestamp = DateTime.UtcNow;
             Code = 0;
         }
         
         public UptimeResult(string url, string group = null, string name = null)
         {
             Success = false;
-            Timestamp = DateTime.Now;
+            Timestamp = DateTime.UtcNow;
             Group = group;
             Name = name;
             Url = url;

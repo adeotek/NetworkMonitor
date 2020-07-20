@@ -30,14 +30,14 @@ namespace Adeotek.NetworkMonitor.Results
         public OpenedPortResult()
         {
             Success = false;
-            Timestamp = DateTime.Now;
+            Timestamp = DateTime.UtcNow;
             Port = 0;
         }
         
         public OpenedPortResult(string host, int port, string group = null, string name = null)
         {
             Success = false;
-            Timestamp = DateTime.Now;
+            Timestamp = DateTime.UtcNow;
             Group = group;
             Name = name;
             Host = host;

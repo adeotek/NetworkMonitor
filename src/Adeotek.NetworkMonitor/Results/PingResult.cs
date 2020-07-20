@@ -31,13 +31,13 @@ namespace Adeotek.NetworkMonitor.Results
         public PingResult()
         {
             Success = false;
-            Timestamp = DateTime.Now;
+            Timestamp = DateTime.UtcNow;
         }
         
         public PingResult(string host, string group = null, string name = null)
         {
             Success = false;
-            Timestamp = DateTime.Now;
+            Timestamp = DateTime.UtcNow;
             Group = group;
             Name = name;
             Host = host;
@@ -45,7 +45,7 @@ namespace Adeotek.NetworkMonitor.Results
 
         public PingResult(PingReply reply, string host = null, string group = null, string name = null)
         {
-            Timestamp = DateTime.Now;
+            Timestamp = DateTime.UtcNow;
             Group = group;
             Name = name;
             Host = host;
