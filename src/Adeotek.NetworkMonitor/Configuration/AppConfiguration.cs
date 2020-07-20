@@ -6,8 +6,8 @@ namespace Adeotek.NetworkMonitor.Configuration
     public class AppConfiguration
     {
         public static readonly string[] WriteDataToTypes = {"LOCALCSVFILE", "POSTGRESQL", "GOOGLESPREADSHEETS"};
-        public PingConfiguration PingTest { get; set; }
-        public SpeedTestConfiguration SpeedTest { get; set; }
+        
+        public List<TestConfiguration> Tests { get; set; }
         public List<DataTarget> WriteDataTo { get; set; }
         public string AppPath { get; set; }
 

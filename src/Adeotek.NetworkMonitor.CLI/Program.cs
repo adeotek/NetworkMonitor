@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using Adeotek.NetworkMonitor.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -77,9 +76,28 @@ namespace Adeotek.NetworkMonitor.CLI
                     Console.WriteLine($"Configuration location: {AppDomain.CurrentDomain.BaseDirectory}");
                 }
 
+                var configFileName = "appsettings.json";
+                var i = 0;
+                foreach (var arg in args)
+                {
+                    i++;
+                    if (arg.ToLower() != "--config")
+                    {
+                        continue;
+                    }
+
+                    if (string.IsNullOrEmpty(args[i]))
+                    {
+                        throw new Exception("Invalid [--config] argument!");
+                    }
+
+                    configFileName = args[i];
+                    break;
+                }
+
                 _configuration = new ConfigurationBuilder()
                     .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                    .AddJsonFile("appsettings.json", false, true)
+                    .AddJsonFile(configFileName, false, true)
                     .AddJsonFile($"appsettings.{_environmentName}.json", true, true)
                     .AddEnvironmentVariables()
                     .AddCommandLine(args)
@@ -92,15 +110,6 @@ namespace Adeotek.NetworkMonitor.CLI
                 }
 
                 _appConfiguration.AppPath = AppDomain.CurrentDomain.BaseDirectory;
-                if (args.Select(a => a.ToLower() == "--do-ping-test").FirstOrDefault() && _appConfiguration.PingTest != null)
-                {
-                    _appConfiguration.PingTest.Enabled = true;
-                }
-
-                if (args.Select(a => a.ToLower() == "--do-speed-test").FirstOrDefault() && _appConfiguration.SpeedTest != null)
-                {
-                    _appConfiguration.SpeedTest.Enabled = true;
-                }
 
                 return true;
             }

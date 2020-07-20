@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 
-namespace Adeotek.NetworkMonitor
+namespace Adeotek.NetworkMonitor.Results
 {
     public interface ITestResult
     {
-        List<string> GetOutputFields();
+        IEnumerable<string> GetFields();
+        List<string> GetFieldsForTableCreate();
         bool IsSuccessful();
         object GetResult();
         object GetMessage();

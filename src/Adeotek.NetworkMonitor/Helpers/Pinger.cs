@@ -2,8 +2,9 @@
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
+using Adeotek.NetworkMonitor.Results;
 
-namespace Adeotek.NetworkMonitor
+namespace Adeotek.NetworkMonitor.Helpers
 {
     public class Pinger
     {
@@ -30,16 +31,16 @@ namespace Adeotek.NetworkMonitor
             return new PingResult(_ping.Send(host, Timeout, Data, PingOptions), host);
         }
 
-        public ITestResult SafePing(string host)
+        public ITestResult SafePing(string host, string group = null, string name = null)
         {
             PingResult result;
             try
             {
-                result = new PingResult(_ping.Send(host, Timeout, Data, PingOptions), host);
+                result = new PingResult(_ping.Send(host, Timeout, Data, PingOptions), host, group, name);
             }
             catch (Exception e)
             {
-                result = new PingResult {Success = false, Target = host, Message = e.Message};
+                result = new PingResult {Success = false, Group = group, Host = host, Message = e.Message};
             }
 
             return result;

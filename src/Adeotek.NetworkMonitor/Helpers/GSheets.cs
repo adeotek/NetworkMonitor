@@ -7,7 +7,7 @@ using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 
-namespace Adeotek.NetworkMonitor
+namespace Adeotek.NetworkMonitor.Helpers
 {
     public class GSheets
     {
